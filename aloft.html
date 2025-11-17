@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aloft Hotels | Different. By Design.</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --font-primary: 'Manrope', sans-serif;
+            --color-bg: #03001C;
+            --color-text: #f0f2f5;
+            --color-text-muted: #a1a1aa;
+            --color-accent-primary: #c026d3;
+            --color-accent-secondary: #a855f7;
+            --color-surface: rgba(17, 12, 48, 0.5);
+            --color-border: rgba(99, 52, 163, 0.3);
+        }
+
+        /* --- ADDED: Custom Text Selection Color --- */
+        ::selection {
+            background-color: var(--color-accent-primary);
+            color: var(--color-text);
+        }
+        ::-moz-selection { /* Firefox */
+            background-color: var(--color-accent-primary);
+            color: var(--color-text);
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            overflow-x: hidden;
+            background-image: linear-gradient(to bottom, #03001C, #1a0230);
+            min-height: 100vh;
+        }
+        .canvas-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.7;
+        }
+        
+        header {
+            transform: translateY(-100%);
+            animation: slideDown 0.6s ease-out 0.5s forwards;
+            background-color: rgba(3, 0, 28, 0.7);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid;
+            border-image-slice: 1;
+            border-image-source: linear-gradient(to right, var(--color-accent-secondary), var(--color-accent-primary));
+        }
+        @keyframes slideDown {
+            to { transform: translateY(0); }
+        }
+
+        /* --- UPDATED: Simple FADE Animation --- */
+        .step-card {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-out;
+            /* REMOVED: transform: translateX(30px) */
+        }
+        .step-card.active {
+            display: block;
+            opacity: 1;
+            /* REMOVED: transform: translateX(0) */
+        }
+        .step-card.transition-out {
+            display: block; /* Kept for transition */
+            opacity: 0;
+            /* REMOVED: transform: translateX(-30px) */
+        }
+
+        /* --- Form Elements --- */
+        .input-group {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+        .input-field {
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 0.5rem;
+            color: var(--color-text);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: var(--color-accent-primary);
+            box-shadow: 0 0 0 3px rgba(192, 38, 211, 0.3);
+        }
+        .input-label {
+            position: absolute;
+            left: 1rem;
+            top: 1rem;
+            color: var(--color-text-muted);
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+        .input-field:focus + .input-label,
+        .input-field:not(:placeholder-shown) + .input-label,
+        .input-group.has-value .input-label {
+            top: -0.5rem;
+            left: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--color-accent-primary);
+            background-color: var(--color-bg);
+            padding: 0 0.5rem;
+        }
+        .input-field.error {
+            border-color: #f87171;
+            box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.3);
+        }
+        .input-field.error + .input-label { color: #f87171; }
+
+        /* --- Button Styles --- */
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease-out;
+            text-align: center;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        .btn:active {
+            transform: translateY(0) scale(0.98);
+            box-shadow: none;
+        }
+        .btn-primary {
+            background-image: linear-gradient(to right, var(--color-accent-secondary) 0%, var(--color-accent-primary) 100%);
+            color: white;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-size: 150%;
+        }
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--color-text);
+            border: 1px solid var(--color-border);
+        }
+        .btn-secondary:hover {
+            background-color: var(--color-surface);
+            border-color: var(--color-text-muted);
+        }
+
+        /* --- Choice Cards --- */
+        .choice-card, .checkbox-item {
+            display: inline-flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            margin: 0.5rem;
+            background-color: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease-out;
+        }
+        .choice-card:hover, .checkbox-item:hover {
+            transform: translateY(-2px);
+            border-color: var(--color-text-muted);
+        }
+        .choice-card.selected, .checkbox-item.selected {
+            border-color: var(--color-accent-primary);
+            background-color: rgba(192, 38, 211, 0.1);
+            box-shadow: 0 0 0 1px var(--color-accent-primary);
+        }
+        .color-swatch {
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 0.75rem;
+            vertical-align: middle;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        .choice-card.selected .color-swatch {
+            border-color: white;
+        }
+        .checkbox-item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* --- QR Code --- */
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            background-color: white;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+            padding: 10px;
+            animation: pulse-glow 2.5s infinite ease-in-out;
+        }
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 0 15px rgba(192, 38, 211, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(192, 38, 211, 0.7);
+            }
+        }
+
+        /* --- Custom Date Picker Modal --- */
+        .datepicker-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.3s ease-out;
+        }
+        .datepicker-modal.active {
+            display: flex;
+            opacity: 1;
+        }
+        .datepicker-content {
+            background-color: #0d0a2e;
+            border: 1px solid var(--color-border);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            width: 90%;
+            max-width: 700px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transform: scale(0.95);
+            transition: transform 0.3s ease-out;
+        }
+        .datepicker-modal.active .datepicker-content {
+            transform: scale(1);
+        }
+        .datepicker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .datepicker-header button {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            color: var(--color-text);
+            border-radius: 50%;
+            width: 2.5rem;
+            height: 2.5rem;
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .datepicker-header button:hover {
+            background-color: var(--color-accent-primary);
+            border-color: var(--color-accent-primary);
+        }
+        .datepicker-header h2 {
+            font-size: 1.25rem;
+            font-weight: 500;
+            text-align: center;
+            flex-grow: 1;
+        }
+        .datepicker-calendars {
+            display: flex;
+            flex-direction: column; /* Stack on mobile */
+            gap: 1.5rem;
+        }
+        @media (min-width: 640px) {
+            .datepicker-calendars {
+                flex-direction: row; /* Side-by-side on larger screens */
+            }
+        }
+        .calendar {
+            width: 100%; /* Full width on mobile */
+        }
+        @media (min-width: 640px) {
+            .calendar {
+                width: 50%; /* Half width on larger screens */
+            }
+        }
+        .calendar-header {
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            margin-bottom: 0.5rem;
+        }
+        .calendar-weekdays div {
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--color-text-muted);
+        }
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+        }
+        .calendar-day {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 2.5rem;
+            text-align: center;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+        .calendar-day:not(.disabled):hover {
+            background-color: var(--color-surface);
+            border-color: var(--color-border);
+        }
+        .calendar-day.disabled {
+            color: rgba(161, 161, 170, 0.3);
+            cursor: not-allowed;
+        }
+        .calendar-day.empty {
+            cursor: default;
+        }
+        .calendar-day.selected-start, .calendar-day.selected-end {
+            background-color: var(--color-accent-primary);
+            color: white;
+            font-weight: 600;
+        }
+        .calendar-day.in-range {
+            background-color: rgba(192, 38, 211, 0.15);
+            border-radius: 0;
+        }
+        .datepicker-footer {
+            display: flex;
+            flex-direction: column; /* Stack on mobile */
+            gap: 1rem;
+            align-items: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--color-border);
+        }
+        @media (min-width: 640px) {
+            .datepicker-footer {
+                flex-direction: row; /* Side-by-side on larger screens */
+                justify-content: space-between;
+            }
+        }
+        .datepicker-footer .info {
+            font-size: 0.9rem;
+            color: var(--color-text-muted);
+        }
+
+        /* --- Other Utilities --- */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        .shake { animation: shake 0.5s ease-in-out; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="min-h-screen text-white">
+    <!-- Animated Background Canvas -->
+    <canvas id="backgroundCanvas" class="canvas-bg"></canvas>
+
+    <!-- Fixed Header -->
+    <header class="fixed top-0 left-0 w-full z-50 py-4 px-6 flex justify-between items-center">
+        <div class="flex items-center">
+            <div class="w-10 h-10 bg-gradient-to-br from-fuchsia-500 to-purple-600 rounded mr-3"></div>
+            <span class="text-xl font-light">Aloft Hotels</span>
+        </div>
+        <div class="text-sm font-light">Different. By Design.</div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 pt-32 pb-16 max-w-4xl relative">
+        
+        <!-- ADDED: Step Indicator -->
+        <div id="stepIndicator" class="absolute top-24 right-6 text-sm font-light text-purple-300 transition-opacity duration-500" style="opacity: 0;">
+            <!-- JS will populate this -->
+        </div>
+        
+        <!-- Step 1: When -->
+        <section id="step1" class="step-card">
+            <h1 class="text-5xl font-light mb-8">Where are you heading?</h1>
+            
+            <div class="grid grid-cols-1 md:grid-cols-1 gap-6">
+                <div class="input-group">
+                    <input type="text" id="destination" class="input-field" placeholder=" " required>
+                    <label for="destination" class="input-label">Destination</label>
+                </div>
+                
+                <div class="input-group" id="dateRangeGroup">
+                    <input type="text" id="dateRangeDisplay" class="input-field cursor-pointer" placeholder=" " readonly>
+                    <label for="dateRangeDisplay" class="input-label">Dates</label>
+                </div>
+                
+                <input type="date" id="checkIn" class="hidden" required>
+                <input type="number" id="nights" class="hidden" min="1" value="1" required>
+                <input type="date" id="checkOut" class="hidden" required>
+            </div>
+            
+            <div class="mt-12 flex justify-end">
+                <button id="next1" class="btn btn-primary w-full md:w-auto">Next</button>
+            </div>
+        </section>
+
+        <!-- Step 2: Design -->
+        <section id="step2" class="step-card">
+            <h1 class="text-5xl font-light mb-8">Design Your Vibe</h1>
+            <div class="space-y-10">
+                <!-- Groups 1-9 (Beds, Type, Color, etc.) -->
+                <div>
+                    <h3 class="text-2xl font-light mb-4">Number of beds</h3>
+                    <div>
+                        <input type="radio" id="beds1" name="beds" value="1" class="hidden">
+                        <label for="beds1" class="choice-card">1 Bed</label>
+                        <input type="radio" id="beds2" name="beds" value="2" class="hidden">
+                        <label for="beds2" class="choice-card">2 Beds</label>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-light mb-4">Bed type</h3>
+                    <div>
+                        <input type="radio" id="queen" name="bedType" value="queen" class="hidden">
+                        <label for="queen" class="choice-card">Queen</label>
+                        <input type="radio" id="king" name="bedType" value="king" class="hidden">
+                        <label for="king" class="choice-card">King</label>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-light mb-4">Wall color</h3>
+                    <div>
+                        <input type="radio" id="wallGray" name="wallColor" value="gray" class="hidden">
+                        <label for="wallGray" class="choice-card">
+                            <span class="color-swatch" style="background-color: #9ca3af"></span> Gray
+                        </label>
+                        <input type="radio" id="wallBlue" name="wallColor" value="blue" class="hidden">
+                        <label for="wallBlue" class="choice-card">
+                            <span class="color-swatch" style="background-color: #3b82f6"></span> Blue
+                        </label>
+                        <input type="radio" id="wallGreen" name="wallColor" value="green" class="hidden">
+                        <label for="wallGreen" class="choice-card">
+                            <span class="color-swatch" style="background-color: #10b981"></span> Green
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-light mb-4">Lighting color</h3>
+                    <div>
+                        <input type="radio" id="lightWarm" name="lightColor" value="warm" class="hidden">
+                        <label for="lightWarm" class="choice-card">
+                            <span class="color-swatch" style="background-color: #fbbf24"></span> Warm
+                        </label>
+                        <input type="radio" id="lightCool" name="lightColor" value="cool" class="hidden">
+                        <label for="lightCool" class="choice-card">
+                            <span class="color-swatch" style="background-color: #60a5fa"></span> Cool
+                        </label>
+                        <input type="radio" id="lightWhite" name="lightColor" value="white" class="hidden">
+                        <label for="lightWhite" class="choice-card">
+                            <span class="color-swatch" style="background-color: #f3f4f6"></span> White
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-light mb-4">Pillow type</h3>
+                    <div>
+                        <input type="radio" id="soft" name="pillowType" value="soft" class="hidden">
+                        <label for="soft" class="choice-card">Soft</label>
+                        <input type="radio" id="medium" name="pillowType" value="medium" class="hidden">
+                        <label for="medium" class="choice-card">Medium</label>
+                        <input type="radio" id="firm" name="pillowType" value="firm" class="hidden">
+                        <label for="firm" class="choice-card">Firm</label>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-light mb-4">Pillowcase color</h3>
+                    <div>
+                        <input type="radio" id="pillowWhite" name="pillowcaseColor" value="white" class="hidden">
+                        <label for="pillowWhite" class="choice-card">
+                            <span class="color-swatch" style="background-color: #ffffff"></span> White
+                        </label>
+                        <input type="radio" id="pillowCream" name="pillowcaseColor" value="cream" class="hidden">
+                        <label for="pillowCream" class="choice-card">
+                            <span class="color-swatch" style="background-color: #fef3c7"></span> Cream
+                        </label>
+                        <input type="radio" id="pillowGray" name="pillowcaseColor" value="gray" class="hidden">
+                        <label for="pillowGray" class="choice-card">
+                            <span class="color-swatch" style="background-color: #d1d5db"></span> Gray
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-light mb-4">Add pets?</h3>
+                    <div>
+                        <input type="radio" id="petsYes" name="pets" value="yes" class="hidden">
+                        <label for="petsYes" class="choice-card">Yes</label>
+                        <input type="radio" id="petsNo" name="pets" value="no" class="hidden">
+                        <label for="petsNo" class="choice-card">No</label>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-light mb-4">Mini Bar (select up to 3)</h3>
+                    <div>
+                        <input type="checkbox" id="water" name="minibar" value="water" class="hidden">
+                        <label for="water" class="checkbox-item">Water</label>
+                        <input type="checkbox" id="cola" name="minibar" value="cola" class="hidden">
+                        <label for="cola" class="checkbox-item">Cola</label>
+                        <input type="checkbox" id="juice" name="minibar" value="juice" class="hidden">
+                        <label for="juice" class="checkbox-item">Juice</label>
+                        <input type="checkbox" id="beer" name="minibar" value="beer" class="hidden">
+                        <label for="beer" class="checkbox-item">Craft Beer</label>
+                        <input type="checkbox" id="wine" name="minibar" value="wine" class="hidden">
+                        <label for="wine" class="checkbox-item">Wine</label>
+                        <input type="checkbox" id="snacks" name="minibar" value="snacks" class="hidden">
+                        <label for="snacks" class="checkbox-item">Snacks</label>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <select id="music" class="input-field">
+                        <option value="" disabled selected>Select music genre</option>
+                        <option value="jazz">Jazz</option>
+                        <option value="electronic">Electronic</option>
+                        <option value="ambient">Ambient</option>
+                        <option value="classical">Classical</option>
+                        <option value="pop">Pop</option>
+                    </select>
+                    <label for="music" class="input-label">Music</label>
+                </div>
+            </div>
+            
+            <div class="mt-12 flex justify-between">
+                <button id="back2" class="btn btn-secondary">Back</button>
+                <button id="next2" class="btn btn-primary">Next</button>
+            </div>
+        </section>
+
+        <!-- Step 3: Payment -->
+        <section id="step3" class="step-card">
+            <h1 class="text-5xl font-light mb-8">Lock it In</h1>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-2xl font-light mb-4">Stay Summary</h3>
+                    <div class="space-y-2 mb-6">
+                        <div id="summaryDestination" class="text-lg">Destination: -</div>
+                        <div id="summaryDates" class="text-lg">Dates: -</div>
+                        <div id="summaryNights" class="text-lg">Nights: -</div>
+                    </div>
+                    
+                    <h3 class="text-2xl font-light mb-4">Your Vibe</h3>
+                    <div id="summaryVibe" class="space-y-2 mb-6 text-gray-300"></div>
+
+                    <h3 class="text-2xl font-light mb-4">Price Summary</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span>Room Rate:</span>
+                            <span id="roomRate">$0.00</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Add-ons:</span>
+                            <span id="addons">$0.00</span>
+                        </div>
+                        <div class="flex justify-between text-xl font-medium mt-4 pt-4 border-t" style="border-color: var(--color-border);">
+                            <span>Total:</span>
+                            <span id="totalPrice">$0.00</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8">
+                        <div id="discountLink" class="text-purple-300 underline cursor-pointer hover:no-underline">Have a discount code?</div>
+                        <div id="discountInput" class="hidden mt-4">
+                            <div class="flex">
+                                <input type="text" id="discountCode" class="input-field flex-grow mr-2" placeholder="Enter code">
+                                <button id="applyDiscount" class="btn btn-secondary">Apply</button>
+                            </div>
+                            <div id="discountMessage" class="mt-2 text-sm"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-2xl font-light mb-4">Payment Details</h3>
+                    <div id="paymentForm">
+                        <div class="input-group">
+                            <input type="text" id="cardNumber" class="input-field" placeholder=" " required>
+                            <label for="cardNumber" class="input-label">Card Number</label>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="input-group">
+                                <input type="text" id="expiry" class="input-field" placeholder=" " required>
+                                <label for="expiry" class="input-label">Expiry (MM/YY)</label>
+                            </div>
+                            <div class="input-group">
+                                <input type="text" id="cvc" class="input-field" placeholder=" " required>
+                                <label for="cvc" class="input-label">CVC</label>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- ADDED: "Total is Zero" Message Container -->
+                    <div id="paymentZero" class="hidden text-center text-green-400 text-lg p-8 border border-green-400/50 rounded-lg bg-green-500/10">
+                        Your total is $0.00. Payment is not required.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-12 flex justify-between">
+                <button id="back3" class="btn btn-secondary">Back</button>
+                <button id="next3" class="btn btn-primary">Pay & Get Key</button>
+            </div>
+        </section>
+
+        <!-- Step 4: Key -->
+        <section id="step4" class="step-card">
+            <h1 class="text-5xl font-light mb-8">You're all set.</h1>
+            
+            <div class="text-center space-y-8">
+                <p class="text-2xl">We're waiting for you.</p>
+                <div id="qrCodeContainer" class="qr-code"></div>
+                <p class="text-xl">Scan this for your mobile key.</p>
+            </div>
+            
+            <div class="mt-12 flex justify-start">
+                <button id="back4" class="btn btn-secondary">Back</button>
+            </div>
+        </section>
+    </main>
+    
+    <!-- ADDED: Credits Footer -->
+    <footer class="text-center p-8 text-xs text-gray-600 border-t" style="border-color: var(--color-border);">
+        <p>A part of the Sofia University Project.</p>
+        <p classF="mt-1">Built by: Khalid, Ilyan, Artur, Mohamed, and Bogomil</p>
+    </footer>
+
+    <!-- Custom Date Picker Modal HTML -->
+    <div id="datepickerModal" class="datepicker-modal">
+        <div class="datepicker-content">
+            <div class="datepicker-header">
+                <button id="prevMonthBtn">&lt;</button>
+                <div class="flex justify-around w-full flex-col sm:flex-row">
+                    <h2 id="monthYear1" class="text-center">Month Year</h2>
+                    <h2 id="monthYear2" class="text-center">Month Year</h2>
+                </div>
+                <button id="nextMonthBtn">&gt;</button>
+            </div>
+            <div class="datepicker-calendars">
+                <div class="calendar">
+                    <div class="calendar-header" id="calendarHeader1"></div>
+                    <div class="calendar-weekdays">
+                        <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+                    </div>
+                    <div class="calendar-days" id="calendarDays1"></div>
+                </div>
+                <div class="calendar" id="calendar2">
+                    <div class="calendar-header" id="calendarHeader2"></div>
+                    <div class="calendar-weekdays">
+                        <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+                    </div>
+                    <div class="calendar-days" id="calendarDays2"></div>
+                </div>
+            </div>
+            <div class="datepicker-footer">
+                <div id="dateInfo" class="info">Select a check-in date.</div>
+                <div class="flex gap-4">
+                    <button id="cancelDatesBtn" class="btn btn-secondary">Cancel</button>
+                    <button id="applyDatesBtn" class="btn btn-primary">Apply</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // --- Canvas Background Script ---
+        const canvas = document.getElementById('backgroundCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let mouse = { x: null, y: null, radius: 100 };
+        const accentColors = [
+            "rgba(192, 38, 211, 0.7)",
+            "rgba(168, 85, 247, 0.7)",
+            "rgba(124, 58, 237, 0.7)"
+        ];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const calendar2 = document.getElementById('calendar2');
+            if (window.innerWidth < 640) {
+                calendar2.style.display = 'none';
+            } else {
+                calendar2.style.display = 'block';
+            }
+            initParticles();
+        }
+        window.addEventListener('resize', resizeCanvas);
+        
+
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.x;
+            mouse.y = e.y;
+        });
+        window.addEventListener('mouseout', () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 1;
+                this.speedX = Math.random() * 0.4 - 0.2;
+                this.speedY = Math.random() * 0.4 - 0.2;
+                this.color = accentColors[Math.floor(Math.random() * accentColors.length)];
+            }
+            update() {
+                if (this.x > canvas.width || this.x < 0) this.speedX = -this.speedX;
+                if (this.y > canvas.height || this.y < 0) this.speedY = -this.speedY;
+
+                if (mouse.x) {
+                    let dx = mouse.x - this.x;
+                    let dy = mouse.y - this.y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < mouse.radius) {
+                        let forceDirectionX = this.x - mouse.x;
+                        let forceDirectionY = this.y - mouse.y;
+                        let force = (mouse.radius - distance) / mouse.radius;
+                        let directionX = (forceDirectionX / distance) * force * 1.5;
+                        let directionY = (forceDirectionY / distance) * force * 1.5;
+                        this.x += directionX;
+                        this.y += directionY;
+                    }
+                }
+                this.x += this.speedX;
+                this.y += this.speedY;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            let particleCount = (canvas.width * canvas.height) / 12000;
+            if (particleCount > 150) particleCount = 150;
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function connectParticles() {
+            let opacity = 0;
+            for (let a = 0; a < particles.length; a++) {
+                for (let b = a + 1; b < particles.length; b++) {
+                    let dx = particles[a].x - particles[b].x;
+                    let dy = particles[a].y - particles[b].y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < 120) {
+                        opacity = 1 - (distance / 120);
+                        ctx.strokeStyle = `rgba(168, 85, 247, ${opacity * 0.2})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[a].x, particles[a].y);
+                        ctx.lineTo(particles[b].x, particles[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let particle of particles) {
+                particle.update();
+                particle.draw();
+            }
+            connectParticles();
+            requestAnimationFrame(animateParticles);
+        }
+
+        initParticles();
+        animateParticles();
+        // --- END CANVAS SCRIPT ---
+
+        
+        // --- Step Navigation & Indicator Script ---
+        const steps = ['step1', 'step2', 'step3', 'step4'];
+        let currentStep = -1;
+        
+        // ADDED: Titles for the step indicator
+        const stepTitles = [
+            "Step 1: When & Where?",
+            "Step 2: Design Your Vibe",
+            "Step 3: Lock it In",
+            "Step 4: You're All Set!"
+        ];
+        const stepIndicator = document.getElementById('stepIndicator');
+
+        function showStep(stepIndex) {
+            if (stepIndex === currentStep) return;
+
+            const oldStepIndex = currentStep;
+            const oldStep = (oldStepIndex >= 0) ? document.getElementById(steps[oldStepIndex]) : null;
+            const newStep = document.getElementById(steps[stepIndex]);
+
+            if (oldStep) {
+                oldStep.classList.add('transition-out');
+                oldStep.classList.remove('active');
+            }
+            if (newStep) {
+                newStep.classList.add('active');
+            }
+            
+            // ADDED: Update Step Indicator
+            if (stepIndicator) {
+                stepIndicator.textContent = stepTitles[stepIndex] || '';
+                stepIndicator.style.opacity = '1';
+            }
+            
+            setTimeout(() => {
+                if (oldStep) {
+                    oldStep.classList.remove('transition-out');
+                }
+            }, 500); // Match CSS transition
+
+            currentStep = stepIndex;
+            
+            if (stepIndex === 3) {
+                const qrContainer = document.getElementById('qrCodeContainer');
+                if (qrContainer.childElementCount === 0) {
+                    new QRCode(qrContainer, {
+                        text: "https://aloft-hotels.marriott.com/",
+                        width: 180,
+                        height: 180,
+                        colorDark : "#000000",
+                        colorLight : "#ffffff",
+                        correctLevel : QRCode.CorrectLevel.H
+                    });
+                }
+            }
+
+            if (stepIndex === 2) {
+                updateSummary();
+            }
+        }
+        
+        // --- Validation Logic ---
+        function validateInput(inputId) {
+            const input = document.getElementById(inputId);
+            if (!input.value.trim() || (input.type === 'number' && input.value < 1)) {
+                input.classList.add('error');
+                return false;
+            } else {
+                input.classList.remove('error');
+                return true;
+            }
+        }
+        function validateDates() {
+            const display = document.getElementById('dateRangeDisplay');
+            if (!validateInput('checkIn') || !validateInput('checkOut')) {
+                display.classList.add('error');
+                return false;
+            } else {
+                display.classList.remove('error');
+                return true;
+            }
+        }
+        function validateRadioGroup(name) {
+            const selected = document.querySelector(`input[name="${name}"]:checked`);
+            if (!selected) {
+                const inputs = document.querySelectorAll(`input[name="${name}"]`);
+                if (inputs.length > 0) {
+                    const h3 = inputs[0].closest('div').previousElementSibling;
+                    if (h3) h3.classList.add('shake');
+                }
+                return false;
+            }
+            return true;
+        }
+        document.body.addEventListener('animationend', (e) => {
+            if (e.animationName === 'shake') e.target.classList.remove('shake');
+        });
+
+        function validateStep1() {
+            let isValid = validateInput('destination');
+            isValid = validateDates() && isValid;
+            return isValid;
+        }
+        function validateStep2() {
+            let isValid = validateRadioGroup('beds');
+            isValid = validateRadioGroup('bedType') && isValid;
+            isValid = validateRadioGroup('wallColor') && isValid;
+            isValid = validateRadioGroup('lightColor') && isValid;
+            isValid = validateRadioGroup('pillowType') && isValid;
+            isValid = validateRadioGroup('pillowcaseColor') && isValid;
+            isValid = validateRadioGroup('pets') && isValid;
+            return isValid;
+        }
+        function validateStep3() {
+            const isPaymentHidden = document.getElementById('paymentForm').style.display === 'none';
+            if (isPaymentHidden) return true;
+            let isValid = validateInput('cardNumber');
+            isValid = validateInput('expiry') && isValid;
+            isValid = validateInput('cvc') && isValid;
+            return isValid;
+        }
+
+        // --- Navigation Button Listeners ---
+        document.getElementById('next1').addEventListener('click', () => {
+            if (validateStep1()) showStep(1);
+        });
+        document.getElementById('next2').addEventListener('click', () => {
+            if (validateStep2()) showStep(2);
+        });
+        document.getElementById('next3').addEventListener('click', () => {
+            if (validateStep3()) showStep(3);
+        });
+        document.getElementById('back2').addEventListener('click', () => showStep(0));
+        document.getElementById('back3').addEventListener('click', () => showStep(1));
+        document.getElementById('back4').addEventListener('click', () => showStep(2));
+
+        // --- Custom Date Picker Script ---
+        const checkInInput = document.getElementById('checkIn');
+        const checkOutInput = document.getElementById('checkOut');
+        const nightsInput = document.getElementById('nights');
+        const dateRangeDisplay = document.getElementById('dateRangeDisplay');
+        const dateRangeGroup = document.getElementById('dateRangeGroup');
+        const datepickerModal = document.getElementById('datepickerModal');
+        const prevMonthBtn = document.getElementById('prevMonthBtn');
+        const nextMonthBtn = document.getElementById('nextMonthBtn');
+        const cancelDatesBtn = document.getElementById('cancelDatesBtn');
+        const applyDatesBtn = document.getElementById('applyDatesBtn');
+        const dateInfo = document.getElementById('dateInfo');
+
+        let today = new Date();
+        today.setHours(0, 0, 0, 0);
+        let currentMonth = today.getMonth();
+        let currentYear = today.getFullYear();
+        let checkInDate = null;
+        let checkOutDate = null;
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+        function renderCalendar(month, year, calendarIndex) {
+            const calendarHeader = document.getElementById(`calendarHeader${calendarIndex}`);
+            const calendarDays = document.getElementById(`calendarDays${calendarIndex}`);
+            calendarHeader.textContent = `${monthNames[month]} ${year}`;
+            calendarDays.innerHTML = '';
+            let firstDay = new Date(year, month, 1).getDay();
+            let daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            for (let i = 0; i < firstDay; i++) {
+                calendarDays.innerHTML += `<div class="calendar-day empty"></div>`;
+            }
+            for (let day = 1; day <= daysInMonth; day++) {
+                let dayDate = new Date(year, month, day);
+                let dayElement = document.createElement('div');
+                dayElement.classList.add('calendar-day');
+                dayElement.textContent = day;
+                if (dayDate < today) {
+                    dayElement.classList.add('disabled');
+                } else {
+                    dayElement.addEventListener('click', () => selectDate(dayDate, dayElement));
+                }
+                if (checkInDate && dayDate.getTime() === checkInDate.getTime()) {
+                    dayElement.classList.add('selected-start');
+                } else if (checkOutDate && dayDate.getTime() === checkOutDate.getTime()) {
+                    dayElement.classList.add('selected-end');
+                } else if (checkInDate && checkOutDate && dayDate > checkInDate && dayDate < checkOutDate) {
+                    dayElement.classList.add('in-range');
+                }
+                calendarDays.appendChild(dayElement);
+            }
+        }
+
+        function renderDualCalendars() {
+            renderCalendar(currentMonth, currentYear, 1);
+            if (window.innerWidth >= 640) {
+                let nextMonth = (currentMonth === 11) ? 0 : currentMonth + 1;
+                let nextYear = (currentMonth === 11) ? currentYear + 1 : currentYear;
+                renderCalendar(nextMonth, nextYear, 2);
+            }
+        }
+
+        function selectDate(date) {
+            if (!checkInDate || (checkInDate && checkOutDate)) {
+                checkInDate = date;
+                checkOutDate = null;
+                dateInfo.textContent = 'Select a check-out date.';
+            } else if (date.getTime() === checkInDate.getTime()) {
+                checkInDate = null;
+                dateInfo.textContent = 'Select a check-in date.';
+            } else if (date < checkInDate) {
+                checkInDate = date;
+                checkOutDate = null;
+                dateInfo.textContent = 'Select a check-out date.';
+            } else {
+                checkOutDate = date;
+                let nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
+                dateInfo.textContent = `Selected ${nights} night${nights > 1 ? 's' : ''}.`;
+            }
+            renderDualCalendars();
+        }
+
+        function formatDate(date) {
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+        function toISODate(date) {
+            return date.toISOString().split('T')[0];
+        }
+        
+        dateRangeDisplay.addEventListener('click', () => {
+            datepickerModal.classList.add('active');
+            renderDualCalendars();
+        });
+        cancelDatesBtn.addEventListener('click', () => {
+            datepickerModal.classList.remove('active');
+            checkInDate = checkInInput.value ? new Date(checkInInput.value + 'T00:00:00') : null;
+            checkOutDate = checkOutInput.value ? new Date(checkOutInput.value + 'T00:00:00') : null;
+        });
+        applyDatesBtn.addEventListener('click', () => {
+            if (checkInDate && checkOutDate) {
+                let nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
+                checkInInput.value = toISODate(checkInDate);
+                checkOutInput.value = toISODate(checkOutDate);
+                nightsInput.value = nights;
+                dateRangeDisplay.value = `${formatDate(checkInDate)} - ${formatDate(checkOutDate)} (${nights} night${nights > 1 ? 's' : ''})`;
+                dateRangeDisplay.classList.remove('error');
+                dateRangeGroup.classList.add('has-value');
+                datepickerModal.classList.remove('active');
+            } else {
+                dateInfo.textContent = 'Please select both a check-in and check-out date.';
+            }
+        });
+        prevMonthBtn.addEventListener('click', () => {
+            currentMonth = (currentMonth === 0) ? 11 : currentMonth - 1;
+            currentYear = (currentMonth === 11) ? currentYear - 1 : currentYear;
+            renderDualCalendars();
+        });
+        nextMonthBtn.addEventListener('click', () => {
+            currentMonth = (currentMonth === 11) ? 0 : currentMonth + 1;
+            currentYear = (currentMonth === 0) ? currentYear + 1 : currentYear;
+            renderDualCalendars();
+        });
+        // --- END Custom Date Picker Script ---
+
+        
+        // --- Form Selection Logic (Checkboxes) ---
+        const checkboxes = document.querySelectorAll('input[name="minibar"]');
+        let selectedCheckboxes = 0;
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const label = this.nextElementSibling;
+                if (this.checked) {
+                    if (selectedCheckboxes < 3) {
+                        label.classList.add('selected');
+                        selectedCheckboxes++;
+                    } else {
+                        this.checked = false;
+                    }
+                } else {
+                    label.classList.remove('selected');
+                    selectedCheckboxes--;
+                }
+                if (selectedCheckboxes >= 3) {
+                    checkboxes.forEach(cb => {
+                        if (!cb.checked) cb.nextElementSibling.classList.add('disabled');
+                    });
+                } else {
+                    checkboxes.forEach(cb => {
+                        cb.nextElementSibling.classList.remove('disabled');
+                    });
+                }
+            });
+        });
+
+        // --- Form Selection Logic (Radios) ---
+        document.querySelectorAll('input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const groupName = this.getAttribute('name');
+                document.querySelectorAll(`input[name="${groupName}"]`).forEach(r => {
+                    r.nextElementSibling.classList.remove('selected');
+                });
+                this.nextElementSibling.classList.add('selected');
+            });
+        });
+
+        // --- Price Calculation & Summary ---
+        function updateSummary() {
+            function getSelectedRadio(name) {
+                const selected = document.querySelector(`input[name="${name}"]:checked`);
+                return selected ? selected.nextElementSibling.textContent.trim() : 'Not selected';
+            }
+
+            const destination = document.getElementById('destination').value || '-';
+            const checkIn = checkInInput.value;
+            const checkOut = checkOutInput.value;
+            const nights = nightsInput.value || '-';
+            
+            document.getElementById('summaryDestination').textContent = `Destination: ${destination}`;
+            if (checkIn && checkOut) {
+                document.getElementById('summaryDates').textContent = `Dates: ${formatDate(new Date(checkIn + 'T00:00:00'))} to ${formatDate(new Date(checkOut + 'T00:00:00'))}`;
+            } else {
+                document.getElementById('summaryDates').textContent = 'Dates: -';
+            }
+            document.getElementById('summaryNights').textContent = `Nights: ${nights}`;
+            
+            const vibeSummary = document.getElementById('summaryVibe');
+            let vibeHtml = '<ul class="list-none space-y-1">';
+            vibeHtml += `<li><strong class="text-purple-300">Beds:</strong> ${getSelectedRadio('beds')}</li>`;
+            vibeHtml += `<li><strong class="text-purple-300">Bed Type:</strong> ${getSelectedRadio('bedType')}</li>`;
+            vibeHtml += `<li><strong class="text-purple-300">Wall Color:</strong> ${getSelectedRadio('wallColor')}</li>`;
+            vibeHtml += `<li><strong class="text-purple-300">Lighting:</strong> ${getSelectedRadio('lightColor')}</li>`;
+            vibeHtml += `<li><strong class="text-purple-300">Pillow:</strong> ${getSelectedRadio('pillowType')}</li>`;
+            
+            const music = document.getElementById('music').value;
+            if (music) {
+                vibeHtml += `<li><strong class="text-purple-300">Music:</strong> ${music.charAt(0).toUpperCase() + music.slice(1)}</li>`;
+            }
+            const minibarItems = document.querySelectorAll('input[name="minibar"]:checked');
+            if (minibarItems.length > 0) {
+                let items = Array.from(minibarItems).map(item => item.nextElementSibling.textContent.trim()).join(', ');
+                vibeHtml += `<li><strong class="text-purple-300">Mini Bar:</strong> ${items}</li>`;
+            }
+            vibeHtml += '</ul>';
+            vibeSummary.innerHTML = vibeHtml;
+
+            const baseRate = 199;
+            const nightsCount = parseInt(nights) || 1;
+            const roomTotal = baseRate * nightsCount;
+            let addonsTotal = 0;
+            const pets = document.querySelector('input[name="pets"]:checked');
+            if (pets && pets.value === 'yes') addonsTotal += 25;
+            addonsTotal += minibarItems.length * 5;
+            
+            document.getElementById('roomRate').textContent = `$${roomTotal.toFixed(2)}`;
+            document.getElementById('addons').textContent = `$${addonsTotal.toFixed(2)}`;
+            document.getElementById('totalPrice').textContent = `$${(roomTotal + addonsTotal).toFixed(2)}`;
+        }
+
+        // --- Discount Code Logic ---
+        const discountLink = document.getElementById('discountLink');
+        const discountInput = document.getElementById('discountInput');
+        const discountCode = document.getElementById('discountCode');
+        const applyDiscount = document.getElementById('applyDiscount');
+        const discountMessage = document.getElementById('discountMessage');
+        const paymentForm = document.getElementById('paymentForm');
+        const payButton = document.getElementById('next3');
+        const paymentZero = document.getElementById('paymentZero'); // ADDED
+        
+        discountLink.addEventListener('click', () => {
+            discountLink.classList.add('hidden');
+            discountInput.classList.remove('hidden');
+        });
+        
+        applyDiscount.addEventListener('click', () => {
+            const code = discountCode.value.trim();
+            if (code.toLowerCase() === 'sofuni2025') {
+                discountMessage.textContent = '100% discount applied!';
+                discountMessage.className = 'mt-2 text-sm text-green-400';
+                document.getElementById('totalPrice').textContent = '$0.00';
+                
+                // UPDATED: Hide form, show zero message
+                paymentForm.style.display = 'none';
+                paymentZero.classList.remove('hidden');
+                
+                payButton.textContent = 'Confirm Your Stay';
+            } else {
+                discountMessage.textContent = 'Invalid discount code.';
+                discountMessage.className = 'mt-2 text-sm text-red-400';
+                
+                // ADDED: Show form, hide zero message
+                paymentForm.style.display = 'block';
+                paymentZero.classList.add('hidden');
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                showStep(0);
+            }, 600);
+            resizeCanvas();
+        });
+    </script>
+</body>
+</html>
